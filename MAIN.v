@@ -75,11 +75,11 @@ begin
 		state <= nextstate;
 end
 
-always@(posedge Div_CLK)
+always@(posedge Div_CLK) //WAIT计时
 begin
 	if(shutdown == 1)
 		shutdown = 0;
-	if(state == WAIT && shutdown == 0)
+	else if(state == WAIT)
 	begin
 		if(count == 20'd10000) //1s 
 		begin
@@ -89,6 +89,8 @@ begin
 		else
 			count <= count + 1;
 	end
+	else
+		count <= 0;
 end
 
 //--------------组合逻辑----------------
@@ -134,7 +136,7 @@ begin
 	endcase
 end
 
-always@(state)
+always@(state) //改变light
 begin
 	case(state)
 		IDLE: light = 2'd0;
@@ -145,12 +147,12 @@ begin
 	endcase
 end
 
-always@(light)
+always@(light) //控制灯
 begin
 	case(light)
 	2'd0: LED = 4'b0000;
 	2'd1: LED = 4'b0011;
-	2'd2: LED = 4'b1111;
+	2'd2: LED = 4'b0110;
 	2'd3: LED = 4'b1100;
 	endcase
 end
