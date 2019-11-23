@@ -33,15 +33,23 @@ reg [2:0]state;
 reg [2:0]nextstate;
 reg [19:0]count;
 reg shutdown;
-reg [1:0]light;
 
 wire fake_switch;
 
-parameter IDLE = 3'b000; //不发光
-parameter WAIT = 3'b001; //等待熄灭
-parameter SUN = 3'b010; //日光
-parameter YELLOW = 3'b011; //黄光
-parameter WHITE = 3'b100; //白光
+//状态常量
+parameter IDLE = 3'd0; //不发光
+parameter SUN = 3'd1; //日光
+parameter YELLOW = 3'd2; //黄光
+parameter WHITE = 3'd3; //白光
+parameter WAITSUN = 3'd4; //等待日光
+parameter WAITYLW = 3'd5; //等待黄光
+parameter WAITWHT = 3'd6; //等待白光
+
+//[3:0]LED常量
+parameter LIGHT_W = 4'b0011; //白光
+parameter LIGHT_S = 4'b0110; //日光
+parameter LIGHT_Y = 4'b1100; //黄光
+parameter LIGHT_N = 4'b0000; //不发光
 
 SwitchDetection SwitchDetection(.Sys_CLK(Sys_CLK),.Key(Key),.fake_switch(fake_switch));
 
@@ -51,7 +59,6 @@ begin
 	Div_Cnt = 16'd0;
 	count = 20'd0;
 	shutdown = 1'd0;
-	light = 1'd0;
 	state = IDLE;
 end
 
@@ -79,7 +86,7 @@ always@(posedge Div_CLK) //WAIT计时
 begin
 	if(shutdown == 1)
 		shutdown = 0;
-	else if(state == WAIT)
+	else if(state == WAITSUN || state == WAITYLW || state == WAITWHT)
 	begin
 		if(count == 20'd10000) //1s 
 		begin
@@ -94,7 +101,7 @@ begin
 end
 
 //--------------组合逻辑----------------
-always@(state or shutdown or fake_switch or light) //生成下一状态
+always@(state or shutdown or fake_switch) //生成下一状态
 begin
 	case(state)
 		IDLE:
@@ -104,56 +111,61 @@ begin
 				nextstate = IDLE;
 		WHITE:
 			if(fake_switch == 0)
-				nextstate = WAIT;
+				nextstate = WAITSUN;
 			else
 				nextstate = WHITE;
 		SUN:
 			if(fake_switch == 0)
-				nextstate = WAIT;
+				nextstate = WAITYLW;
 			else
 				nextstate = SUN;
 		YELLOW:
 			if(fake_switch == 0)
-				nextstate = WAIT;
+				nextstate = WAITWHT;
 			else
 				nextstate = YELLOW;
-		WAIT:
+		WAITWHT:
 			if(fake_switch == 1)
-			begin
-				if(light == 3)
-					nextstate = WHITE;
-				else if(light == 2)
-					nextstate = YELLOW;
-				else
-					nextstate = SUN;
-			end
+				nextstate = WHITE;
 			else if(shutdown == 1)
 				nextstate = IDLE;
 			else
-				nextstate = WAIT;
+				nextstate = WAITWHT;
+		WAITSUN:
+			if(fake_switch == 1)
+				nextstate = SUN;
+			else if(shutdown == 1)
+				nextstate = IDLE;
+			else
+				nextstate = WAITSUN;
+		WAITYLW:
+			if(fake_switch == 1)
+				nextstate = YELLOW;
+			else if(shutdown == 1)
+				nextstate = IDLE;
+			else
+				nextstate = WAITYLW;
 		default:
 			nextstate = IDLE;
 	endcase
 end
 
-always@(state) //改变light
+always@(state) //控制灯
 begin
 	case(state)
-		IDLE: light = 2'd0;
-		WHITE: light = 2'd1;
-		SUN: light = 2'd2;
-		YELLOW: light = 2'd3;
-		default: light = light;
-	endcase
-end
-
-always@(light) //控制灯
-begin
-	case(light)
-	2'd0: LED = 4'b0000;
-	2'd1: LED = 4'b0011;
-	2'd2: LED = 4'b0110;
-	2'd3: LED = 4'b1100;
+		IDLE   : LED = LIGHT_N;
+		WHITE  : LED = LIGHT_W;
+		SUN    : LED = LIGHT_S;
+		YELLOW : LED = LIGHT_Y;
+		//等待时亮灯
+		//WAITWHT: LED = LIGHT_Y;
+		//WAITSUN: LED = LIGHT_W;
+		//WAITYLW: LED = LIGHT_S;
+		//等待时灭灯
+		WAITWHT: LED = LIGHT_N;
+		WAITSUN: LED = LIGHT_N;
+		WAITYLW: LED = LIGHT_N;
+		default: LED = LIGHT_N;
 	endcase
 end
 
