@@ -28,6 +28,7 @@ module MAIN_test;
 	reg Sys_CLK;
 	reg Sys_RST;
 	reg [1:0] Key;
+	reg [1:0] Switch;
 
 	// Outputs
 	wire [3:0] LED;
@@ -47,6 +48,7 @@ module MAIN_test;
 		Sys_CLK = 0;
 		Sys_RST = 1;
 		Key = 0;
+		switch = 0;
 
 		// Wait 100 ns for global reset to finish
 		#100;

@@ -18,23 +18,23 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module MAIN(Sys_CLK,Sys_RST,Key,LED);
+module MAIN(Div_CLK,Sys_RST,Key,Switch,LED,fake_switch);
 
-input Sys_CLK;
+input Div_CLK;
 input [1:0]Key;
+input [1:0]Switch;
 input Sys_RST;
-//output reg [7:0]SEG;
-//output reg [1:0]COM;
+input fake_switch;
 output reg [3:0]LED;
 
-reg Div_CLK;
-reg [15:0]Div_Cnt;
 reg [2:0]state;
 reg [2:0]nextstate;
 reg [19:0]count;
 reg shutdown;
 
-wire fake_switch;
+wire [19:0]duration;
+
+assign duration = Switch[0]?20'd100000:20'd10000; //靠近数码管侧开关，等待时长10s或1s
 
 //状态常量
 parameter IDLE = 3'd0; //不发光
@@ -51,28 +51,14 @@ parameter LIGHT_S = 4'b0110; //日光
 parameter LIGHT_Y = 4'b1100; //黄光
 parameter LIGHT_N = 4'b0000; //不发光
 
-SwitchDetection SwitchDetection(.Sys_CLK(Sys_CLK),.Key(Key),.fake_switch(fake_switch));
-
 initial
 begin
-	Div_CLK = 1'd0;
-	Div_Cnt = 16'd0;
 	count = 20'd0;
 	shutdown = 1'd0;
 	state = IDLE;
 end
 
 //----------时序逻辑------------
-always@(posedge Sys_CLK)
-begin
-	if(Div_Cnt == 12'd2500)
-	begin
-		Div_CLK <= ~Div_CLK; //T = 0.1ms;
-		Div_Cnt <= 12'd0;
-	end
-	else
-		Div_Cnt <= Div_Cnt + 1;
-end
 
 always@(posedge Div_CLK) //状态跳转程序
 begin
@@ -88,7 +74,7 @@ begin
 		shutdown = 0;
 	else if(state == WAITSUN || state == WAITYLW || state == WAITWHT)
 	begin
-		if(count == 20'd10000) //1s 
+		if(count == duration) //1s 
 		begin
 			count <= 20'd0;
 			shutdown = 1;
