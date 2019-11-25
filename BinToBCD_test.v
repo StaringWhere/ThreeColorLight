@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   19:51:48 11/23/2019
-// Design Name:   SwitchDetection
-// Module Name:   D:/Workspace/verilog/ise/ThreeColorLight/SwitchDetection_test.v
+// Create Date:   03:28:31 11/26/2019
+// Design Name:   BinToBCD
+// Module Name:   D:/Workspace/verilog/ise/ThreeColorLight/Verilog HDL/BinToBCD_test.v
 // Project Name:  ThreeColorLight
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: SwitchDetection
+// Verilog Test Fixture created by ISE for module: BinToBCD
 //
 // Dependencies:
 // 
@@ -22,36 +22,39 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module SwitchDetection_test;
+module BinToBCD_test;
 
 	// Inputs
+	reg [19:0] Data_Bin;
 	reg Sys_CLK;
-	reg [1:0] Key;
 
 	// Outputs
-	wire fake_switch;
+	wire [24:0] Data_BCD;
 
 	// Instantiate the Unit Under Test (UUT)
-	SwitchDetection uut (
-		.Sys_CLK(Sys_CLK), 
-		.Key(Key), 
-		.fake_switch(fake_switch)
+	BinToBCD uut (
+		.Data_Bin(Data_Bin), 
+		.Data_BCD(Data_BCD), 
+		.Sys_CLK(Sys_CLK)
 	);
-
-	always #10 Sys_CLK<=~Sys_CLK;
+	
+	always #10 Sys_CLK = ~Sys_CLK;
 	
 	initial begin
 		// Initialize Inputs
+		Data_Bin = 0;
 		Sys_CLK = 0;
-		Key = 0;
 
 		// Wait 100 ns for global reset to finish
 		#100;
+        
 		// Add stimulus here
-        #300 Key[0] = 1;
-		#1300000 Key[0] = 0;
-        #300000 Key[0] = 1;
-		#1300000 Key[0] = 0;
+		Data_Bin = 20'd19;
+		#100
+		Data_Bin = 20'd43508;
+		#100
+		Data_Bin = 20'd1048575;
+
 	end
       
 endmodule

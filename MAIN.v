@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module MAIN(Div_CLK,Sys_RST,Key,Switch,LED,fake_switch);
+module MAIN(Div_CLK,Sys_RST,Key,Switch,LED,fake_switch,count,state);
 
 input Div_CLK;
 input [1:0]Key;
@@ -26,10 +26,10 @@ input [1:0]Switch;
 input Sys_RST;
 input fake_switch;
 output reg [3:0]LED;
+output reg [19:0]count;
+output reg [2:0]state;
 
-reg [2:0]state;
 reg [2:0]nextstate;
-reg [19:0]count;
 reg shutdown;
 
 wire [19:0]duration;
@@ -74,7 +74,7 @@ begin
 		shutdown = 0;
 	else if(state == WAITSUN || state == WAITYLW || state == WAITWHT)
 	begin
-		if(count == duration) //1s 
+		if(count == duration)
 		begin
 			count <= 20'd0;
 			shutdown = 1;
