@@ -51,12 +51,16 @@ module ThreeColorLight_Top_test;
 	initial begin
 		// Initialize Inputs
 		Sys_CLK = 0;
-		Sys_RST = 0;
+		Sys_RST = 1;
 		Key = 0;
-		Switch = 0;
+		Switch = 2'b01;
 
 		// Wait 100 ns for global reset to finish
 		#100;
+		
+		#10_000_000 Key[0] = 1;
+		#20_000_000 Key[0] = 0;
+		
         
 		// Add stimulus here
 
