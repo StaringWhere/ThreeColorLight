@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module TreeColorLight_Top(Sys_CLK,Sys_RST,Key,Switch,LED,SEG,COM);
+module ThreeColorLight_Top(Sys_CLK,Sys_RST,Key,Switch,LED,SEG,COM);
 
 input Sys_CLK;
 input [1:0]Key;
@@ -84,7 +84,8 @@ LEDNixietube LEDNixietube(
 	.count(count),
 	.state(state),
 	.COM(COM),
-	.SEG(SEG)
+	.SEG(SEG),
+	.Switch(Switch)
 	);
 
 endmodule

@@ -36,7 +36,7 @@ module ThreeColorLight_Top_test;
 	wire [1:0] COM;
 	
 	// Instantiate the Unit Under Test (UUT)
-	TreeColorLight_Top uut (
+	ThreeColorLight_Top uut (
 		.Sys_CLK(Sys_CLK), 
 		.Sys_RST(Sys_RST), 
 		.Key(Key), 

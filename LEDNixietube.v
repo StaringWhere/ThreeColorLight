@@ -18,13 +18,14 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module LEDNixietube(Sys_CLK,Div_CLK,Sys_RST,count,state,COM,SEG);
+module LEDNixietube(Sys_CLK,Div_CLK,Sys_RST,count,state,COM,SEG,Switch);
 
 input Sys_CLK;
 input Div_CLK;
 input Sys_RST;
 input [19:0]count;
 input state;
+input [1:0]Switch;
 output [1:0]COM;
 output [7:0]SEG;
 
@@ -38,8 +39,7 @@ begin
 	Num[9:0] = 10'd0;
 end
 
-//assign COM = (Sys_RST)?((COM_Cnt)?2'b10:2'b01):2'b00;
-assign COM = COM_Cnt?2'b10:2'b01;
+assign COM = (Sys_RST & Switch[0])?((COM_Cnt)?2'b10:2'b01):2'b00;
 
 //数显0-9
 or OR7(SEG[7],Num[0],Num[2],Num[3],Num[5],Num[6],Num[7],Num[8],Num[9]);
@@ -58,11 +58,11 @@ begin
 	Num[9:0] = 10'd0;
 	if(COM_Cnt) //低位
 	begin
-		Num[1] = 1'd1;
+		Num[count_BCD[15:12]] = 1'd1;
 	end
 	else //高位
 	begin
-		Num[2] = 1'd1;
+		Num[count_BCD[19:16]] = 1'd1;
 	end
 end
 
